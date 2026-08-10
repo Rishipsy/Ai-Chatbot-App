@@ -302,7 +302,7 @@ input {
   flex-direction: column;
   align-items: center;
   justify-content: center;
-  gap: 12px;
+  gap: 24px; /* generous spacing between title, subtitle and input */
   pointer-events: none; /* allow clicking through to input */
   transition: opacity 0.32s ease, transform 0.32s ease;
   opacity: 1;
@@ -316,7 +316,7 @@ input {
 }
 
 .hero-title {
-  font-size: clamp(1.6rem, 2.4vw, 2.3rem);
+  font-size: 2.4rem; /* target between 2.2 - 2.5rem */
   margin: 0;
   font-weight: 800;
   color: var(--text-color);
@@ -326,7 +326,7 @@ input {
 .hero-sub {
   margin: 0;
   color: var(--muted-text);
-  font-size: 1rem;
+  font-size: 1.05rem; /* slightly larger muted subheading */
   text-align: center;
 }
 
@@ -547,36 +547,59 @@ input {
   }
 }
 
-/* Input area */
-.input-area {
+/* Input area - positioned inside chat-messages so it can act as hero input and dock to bottom */
+.chat-messages .input-area {
+  position: absolute;
+  left: 50%;
+  transform: translateX(-50%);
+  width: min(900px, 90%);
   display: flex;
-  gap: 12px;
-  align-items: center;
-  padding: 16px 0 8px;
+  justify-content: center;
+  padding: 0;
+  pointer-events: auto; /* allow interaction */
+  z-index: 4;
+  /* default: place the pill slightly below the hero text when empty */
+  top: 62%;
+}
+
+/* When conversation is active, dock the input to the bottom of the chat area */
+.chat-messages:has(.message-row) .input-area {
+  left: 24px;
+  right: 24px;
+  transform: none;
+  width: auto;
+  top: auto;
+  bottom: 18px;
 }
 
 /* Unified pill container for input + buttons */
 .input-pill {
   display: flex;
   align-items: center;
-  gap: 10px;
-  padding: 8px 10px;
-  border-radius: 28px;
+  gap: 12px;
+  padding: 16px 18px; /* comfortable internal padding */
+  border-radius: 26px; /* pill shape */
   background: var(--input-bg, rgba(255,255,255,0.04));
   border: 1px solid var(--border-color);
-  box-shadow: 0 8px 20px rgba(0,0,0,0.08);
+  box-shadow: 0 10px 30px rgba(2,6,23,0.06);
   width: 100%;
   max-width: 980px;
+  align-self: center;
 }
 
 .message-input {
   flex: 1;
-  min-height: 48px;
-  padding: 12px 16px;
+  min-height: 44px;
+  padding: 8px 12px;
   border: none;
   background: transparent;
   color: var(--ai-text-color);
-  font-size: 1rem;
+  font-size: 1.05rem;
+}
+
+.message-input::placeholder {
+  color: var(--muted-text);
+  opacity: 0.9;
 }
 
 .message-input::placeholder {

@@ -52,15 +52,17 @@
           <h2 class="hero-title">How can I help?</h2>
           <p class="hero-sub">Ask me anything — powered by Gemini AI</p>
         </div>
-      </section>
 
-      <footer class="input-area">
-        <div class="input-pill">
-          <input id="messageInput" class="message-input" type="text" placeholder="Type your message..." aria-label="Type your message" />
-          <button id="micButton" class="mic-button" type="button" aria-label="Start voice input">🎤</button>
-          <button id="sendButton" class="send-button" type="button" aria-label="Send message">→<span class="sr-only">Send</span></button>
+        <!-- Input area is placed inside the chat messages area so it can appear as part of the hero when empty
+             and dock to the bottom when conversations exist. IDs are preserved for existing JS. -->
+        <div class="input-area">
+          <div class="input-pill">
+            <input id="messageInput" class="message-input" type="text" placeholder="Ask me anything" aria-label="Ask me anything" />
+            <button id="micButton" class="mic-button" type="button" aria-label="Start voice input">🎤</button>
+            <button id="sendButton" class="send-button" type="button" aria-label="Send message">➤<span class="sr-only">Send</span></button>
+          </div>
         </div>
-      </footer>
+      </section>
     </main>
   </div>
 

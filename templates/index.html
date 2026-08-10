@@ -46,12 +46,20 @@
       <section id="chatMessages" class="chat-messages" aria-label="Chat messages">
         <div id="loadingIndicator" class="loading-indicator visually-hidden">Typing...</div>
         <div id="errorMessage" class="error-message" aria-live="polite"></div>
+
+        <!-- Hero shown when no messages are present -->
+        <div id="chatHero" class="chat-hero" aria-hidden="false">
+          <h2 class="hero-title">How can I help?</h2>
+          <p class="hero-sub">Ask me anything — powered by Gemini AI</p>
+        </div>
       </section>
 
       <footer class="input-area">
-        <input id="messageInput" class="message-input" type="text" placeholder="Type your message..." aria-label="Type your message" />
-        <button id="micButton" class="mic-button" type="button" aria-label="Start voice input">🎤</button>
-        <button id="sendButton" class="send-button" type="button">Send</button>
+        <div class="input-pill">
+          <input id="messageInput" class="message-input" type="text" placeholder="Type your message..." aria-label="Type your message" />
+          <button id="micButton" class="mic-button" type="button" aria-label="Start voice input">🎤</button>
+          <button id="sendButton" class="send-button" type="button" aria-label="Send message">→<span class="sr-only">Send</span></button>
+        </div>
       </footer>
     </main>
   </div>

@@ -8,10 +8,55 @@ document.addEventListener('DOMContentLoaded', function () {
   var isSending = false;
   var errorTimeout = null;
 
+  function escapeHtml(text) {
+    return text
+      .replace(/&/g, '&amp;')
+      .replace(/</g, '&lt;')
+      .replace(/>/g, '&gt;')
+      .replace(/"/g, '&quot;');
+  }
+
+  function formatAIResponse(text) {
+    var escaped = escapeHtml(text);
+    var formatted = escaped.replace(/\*\*(.+?)\*\*/g, '<strong>$1</strong>');
+    var blocks = formatted.split(/\n{2,}/);
+
+    return blocks
+      .map(function (block) {
+        var lines = block.split('\n');
+        if (lines.every(function (line) { return /^\s*[-*]\s+/.test(line); })) {
+          var items = lines
+            .map(function (line) {
+              return '<li>' + line.replace(/^\s*[-*]\s+/, '') + '</li>';
+            })
+            .join('');
+          return '<ul>' + items + '</ul>';
+        }
+
+        if (lines.every(function (line) { return /^\s*\d+\.\s+/.test(line); })) {
+          var items = lines
+            .map(function (line) {
+              return '<li>' + line.replace(/^\s*\d+\.\s+/, '') + '</li>';
+            })
+            .join('');
+          return '<ol>' + items + '</ol>';
+        }
+
+        return '<p>' + lines.join('<br>') + '</p>';
+      })
+      .join('');
+  }
+
   function appendMessage(text, type) {
     var bubble = document.createElement('div');
-    bubble.textContent = text;
     bubble.className = type === 'user' ? 'user-message' : 'ai-message';
+
+    if (type === 'ai') {
+      bubble.innerHTML = formatAIResponse(text);
+    } else {
+      bubble.textContent = text;
+    }
+
     chatMessages.appendChild(bubble);
     scrollChatToBottom();
   }

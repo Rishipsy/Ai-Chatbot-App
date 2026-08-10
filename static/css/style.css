@@ -135,6 +135,24 @@ input {
   border-bottom-left-radius: 4px;
 }
 
+.ai-message ul,
+.ai-message ol {
+  margin: 0.75em 0 0 1.25em;
+  padding-left: 1em;
+}
+
+.ai-message li {
+  margin-bottom: 0.55em;
+}
+
+.ai-message strong {
+  font-weight: 700;
+}
+
+.ai-message p {
+  margin: 0 0 1em;
+}
+
 /* Input area */
 .input-area {
   display: flex;

@@ -12,6 +12,34 @@ document.addEventListener('DOMContentLoaded', function () {
   var recognition = null;
   var isListening = false;
 
+  // Theme initialization: use saved preference or system preference when no saved value
+  var themeToggle = document.getElementById('themeToggle');
+  function applyTheme(theme, save) {
+    document.documentElement.setAttribute('data-theme', theme);
+    if (themeToggle) {
+      // show moon when current theme is light (means clicking will switch to dark)
+      themeToggle.textContent = theme === 'dark' ? '☀️' : '🌙';
+      themeToggle.setAttribute('aria-pressed', theme === 'dark');
+    }
+    if (save) localStorage.setItem('chatbotTheme', theme);
+  }
+
+  (function initTheme() {
+    var saved = null;
+    try { saved = localStorage.getItem('chatbotTheme'); } catch (e) { saved = null; }
+    var prefersDark = window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches;
+    var theme = saved || (prefersDark ? 'dark' : 'light');
+    applyTheme(theme, false);
+
+    if (themeToggle) {
+      themeToggle.addEventListener('click', function () {
+        var current = document.documentElement.getAttribute('data-theme') === 'dark' ? 'dark' : 'light';
+        var next = current === 'dark' ? 'light' : 'dark';
+        applyTheme(next, true);
+      });
+    }
+  })();
+
   function escapeHtml(text) {
     return text
       .replace(/&/g, '&amp;')

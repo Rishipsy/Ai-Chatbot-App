@@ -1,9 +1,60 @@
 /* Basic layout and typography */
 :root {
+  /* Light mode token values */
+  --bg-color: #f8fafc;
+  --page-bg-gradient: radial-gradient(circle at top left, rgba(37, 99, 235, 0.08), transparent 24%), linear-gradient(180deg, #f8fafc 0%, #eef2ff 100%);
+  --text-color: #1f2937;
+  --muted-text: rgba(15, 23, 42, 0.7);
+  --header-start: #334155;
+  --header-end: #2563eb;
+  --header-text: #f8fafc;
+  --chat-bg: linear-gradient(180deg, rgba(248, 250, 252, 0.98) 0%, rgba(238, 245, 255, 0.95) 100%);
+  --chat-pattern: radial-gradient(circle, rgba(59, 130, 246, 0.05) 1px, transparent 1px);
+  --chat-border: rgba(148, 163, 184, 0.24);
+  --user-bubble-bg: #2563eb;
+  --user-text-color: #f8fafc;
+  --ai-bubble-bg: #eff6ff;
+  --ai-text-color: #111827;
+  --accent: #2563eb;
+  --accent-strong: #1e3a8a;
+  --border-color: #d1d5db;
+  --blob-a: rgba(59, 130, 246, 0.55);
+  --blob-b: rgba(99, 102, 241, 0.45);
+  --danger: #dc2626;
   color-scheme: light;
-  color: #1f2937;
-  background-color: #f3f4f6;
+  color: var(--text-color);
   font-family: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+}
+
+/* Dark theme tokens */
+[data-theme="dark"] {
+  --bg-color: #0f1724; /* deep navy */
+  --page-bg-gradient: radial-gradient(circle at top left, rgba(37, 99, 235, 0.04), transparent 24%), linear-gradient(180deg, #0b1220 0%, #0f1724 100%);
+  --text-color: #e6eef8;
+  --muted-text: rgba(230, 238, 248, 0.75);
+  --header-start: #0b1220;
+  --header-end: #0f1724;
+  --header-text: #e6eef8;
+  --chat-bg: linear-gradient(180deg, rgba(8, 12, 20, 0.9) 0%, rgba(12, 16, 24, 0.95) 100%);
+  --chat-pattern: radial-gradient(circle, rgba(255,255,255,0.02) 1px, transparent 1px);
+  --chat-border: rgba(255,255,255,0.04);
+  --user-bubble-bg: #1f4068;
+  --user-text-color: #e6eef8;
+  --ai-bubble-bg: #0b1220;
+  --ai-text-color: #dbeafe;
+  --accent: #60a5fa;
+  --accent-strong: #7c3aed;
+  --border-color: rgba(255,255,255,0.06);
+  --blob-a: rgba(96, 165, 250, 0.28);
+  --blob-b: rgba(124, 58, 237, 0.22);
+  --danger: #ef4444;
+  background-color: var(--bg-color);
+  color: var(--text-color);
+}
+
+/* Smooth transitions for theme changes */
+body, .chat-app, .app-header, .chat-messages, .message-bubble, .input-area, .mic-button, .send-button, .avatar {
+  transition: background-color 0.32s ease, color 0.32s ease, border-color 0.32s ease, box-shadow 0.32s ease;
 }
 
 * {
@@ -20,9 +71,8 @@ body {
   position: relative;
   min-height: 100vh;
   overflow-x: hidden;
-  background: radial-gradient(circle at top left, rgba(37, 99, 235, 0.08), transparent 24%),
-    linear-gradient(180deg, #f8fafc 0%, #eef2ff 100%);
-  color: #1f2937;
+  background: var(--page-bg-gradient);
+  color: var(--text-color);
 }
 
 /* Page loader overlay */
@@ -35,8 +85,8 @@ body {
   align-items: center;
   justify-content: center;
   z-index: 9999;
-  background: linear-gradient(135deg, #334155, #2563eb);
-  color: #fff;
+  background: linear-gradient(135deg, var(--header-start), var(--header-end));
+  color: var(--header-text);
   -webkit-backdrop-filter: blur(6px);
   backdrop-filter: blur(6px);
 }
@@ -121,7 +171,7 @@ body::before {
   height: 320px;
   top: 8%;
   left: 5%;
-  background: radial-gradient(circle at 30% 30%, rgba(59, 130, 246, 0.55), transparent 60%);
+  background: radial-gradient(circle at 30% 30%, var(--blob-a), transparent 60%);
   animation: floatBlobA 12s ease-in-out infinite;
 }
 
@@ -130,7 +180,7 @@ body::after {
   height: 260px;
   bottom: 10%;
   right: 4%;
-  background: radial-gradient(circle at 40% 40%, rgba(99, 102, 241, 0.45), transparent 60%);
+  background: radial-gradient(circle at 40% 40%, var(--blob-b), transparent 60%);
   animation: floatBlobB 14s ease-in-out infinite;
 }
 
@@ -174,9 +224,12 @@ input {
   padding: 28px 24px 26px;
   margin-bottom: 20px;
   border-radius: 28px;
-  background: linear-gradient(135deg, #334155, #2563eb);
-  color: #f8fafc;
+  background: linear-gradient(135deg, var(--header-start), var(--header-end));
+  color: var(--header-text);
   box-shadow: 0 20px 50px rgba(15, 23, 42, 0.16);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
 }
 
 .app-header h1 {
@@ -201,10 +254,9 @@ input {
   flex: 1;
   padding: 28px 24px;
   margin-bottom: 18px;
-  background: linear-gradient(180deg, rgba(248, 250, 252, 0.98) 0%, rgba(238, 245, 255, 0.95) 100%),
-    radial-gradient(circle, rgba(59, 130, 246, 0.05) 1px, transparent 1px);
+  background: var(--chat-bg), var(--chat-pattern);
   background-size: 24px 24px, auto;
-  border: 1px solid rgba(148, 163, 184, 0.24);
+  border: 1px solid var(--chat-border);
   border-radius: 30px;
   box-shadow: 0 30px 60px rgba(15, 23, 42, 0.12);
   overflow-y: auto;
@@ -218,7 +270,7 @@ input {
   align-items: center;
   justify-content: center;
   flex-direction: column;
-  color: rgba(15, 23, 42, 0.3);
+  color: var(--muted-text);
   font-size: 1rem;
   text-align: center;
   white-space: pre-line;
@@ -294,8 +346,8 @@ input {
   width: 8px;
   height: 8px;
   border-radius: 50%;
-  background: #2563eb;
-  box-shadow: 16px 0 0 #2563eb, 32px 0 0 #2563eb;
+  background: var(--accent);
+  box-shadow: 16px 0 0 var(--accent), 32px 0 0 var(--accent);
   animation: dotPulse 1s infinite ease-in-out;
 }
 
@@ -333,15 +385,15 @@ input {
 
 .user-message {
   align-self: flex-end;
-  background: #2563eb;
-  color: #f8fafc;
+  background: var(--user-bubble-bg);
+  color: var(--user-text-color);
   border-bottom-right-radius: 6px;
 }
 
 .ai-message {
   align-self: flex-start;
-  background: #eff6ff;
-  color: #111827;
+  background: var(--ai-bubble-bg);
+  color: var(--ai-text-color);
   border-bottom-left-radius: 6px;
 }
 
@@ -425,11 +477,11 @@ input {
 }
 
 .ai-avatar {
-  background: #1e3a8a;
+  background: var(--accent-strong);
 }
 
 .user-avatar {
-  background: #2563eb;
+  background: var(--accent);
 }
 
 .message-bubble {
@@ -474,10 +526,10 @@ input {
   flex: 1;
   min-height: 48px;
   padding: 0 16px;
-  border: 1px solid #d1d5db;
+  border: 1px solid var(--border-color);
   border-radius: 14px;
-  background: #ffffff;
-  color: #111827;
+  background: var(--input-bg, #ffffff);
+  color: var(--ai-text-color);
 }
 
 .message-input:focus {
@@ -492,7 +544,7 @@ input {
   height: 48px;
   border: none;
   border-radius: 14px;
-  background: #2563eb;
+  background: var(--accent);
   color: #ffffff;
   cursor: pointer;
   transition: transform 0.18s ease, background-color 0.18s ease, box-shadow 0.18s ease;
@@ -523,7 +575,7 @@ input {
 
 .mic-button.listening {
   animation: micPulse 1.2s ease-in-out infinite;
-  background: #dc2626;
+  background: var(--danger);
   box-shadow: 0 0 0 0 rgba(220, 38, 38, 0.4);
 }
 
@@ -548,6 +600,45 @@ input {
   body::after {
     display: none;
   }
+
+  .app-header {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 10px;
+  }
+}
+
+/* Theme toggle button */
+.theme-toggle {
+  appearance: none;
+  border: 1px solid rgba(255,255,255,0.12);
+  background: rgba(255,255,255,0.04);
+  color: var(--header-text);
+  padding: 8px 10px;
+  border-radius: 10px;
+  cursor: pointer;
+  font-size: 1.05rem;
+  line-height: 1;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.theme-toggle:hover {
+  transform: translateY(-1px);
+}
+
+/* Adjust toggle appearance in light mode */
+:root .theme-toggle {
+  border-color: rgba(255,255,255,0.06);
+  background: rgba(255,255,255,0.06);
+  color: var(--header-text);
+}
+
+[data-theme="dark"] .theme-toggle {
+  border-color: rgba(255,255,255,0.12);
+  background: rgba(255,255,255,0.04);
+  color: var(--header-text);
 }
 
 @media (max-width: 600px) {

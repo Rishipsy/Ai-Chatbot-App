@@ -594,17 +594,170 @@ input {
   }
 }
 
-/* Mobile responsiveness */
+/* Layout: sidebar + chat */
+.app-layout {
+  display: flex;
+  gap: 20px;
+  align-items: flex-start;
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 24px;
+}
+
+.history-sidebar {
+  width: 280px;
+  flex: 0 0 280px;
+  background: var(--chat-bg);
+  border: 1px solid var(--chat-border);
+  border-radius: 14px;
+  padding: 12px;
+  box-shadow: 0 20px 40px rgba(15,23,42,0.06);
+  height: calc(100vh - 80px);
+  overflow: auto;
+}
+
+.history-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+}
+
+.history-header h3 {
+  margin: 6px 0 12px;
+  font-size: 1.05rem;
+}
+
+.clear-history-button {
+  background: transparent;
+  border: 1px solid var(--border-color);
+  color: var(--text-color);
+  padding: 6px 10px;
+  border-radius: 8px;
+  cursor: pointer;
+  font-size: 0.9rem;
+}
+
+.clear-history-button:hover {
+  background: rgba(0,0,0,0.04);
+}
+
+.history-body {
+  display: block;
+}
+
+/* History item text + timestamp */
+.history-item {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 10px;
+}
+
+.history-item .history-text {
+  flex: 1 1 auto;
+  overflow: hidden;
+  white-space: nowrap;
+  text-overflow: ellipsis;
+}
+
+.history-item .history-ts {
+  flex: 0 0 auto;
+  margin-left: 8px;
+  font-size: 0.8rem;
+  color: var(--muted-text);
+  white-space: nowrap;
+}
+
+
+.history-list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.history-list li {
+  padding: 10px 12px;
+  border-radius: 8px;
+  cursor: pointer;
+  background: transparent;
+  color: var(--text-color);
+  border: 1px solid transparent;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.history-list li:hover {
+  background: rgba(0,0,0,0.04);
+}
+
+[data-theme="dark"] .history-list li:hover {
+  background: rgba(255,255,255,0.03);
+}
+.history-empty {
+  color: var(--muted-text);
+  padding: 12px;
+}
+
+.history-toggle {
+  display: none; /* only show on mobile */
+  margin-right: 8px;
+  background: transparent;
+  border: none;
+  color: var(--header-text);
+  font-size: 1.1rem;
+  cursor: pointer;
+}
+
+/* Off-canvas behavior for mobile */
 @media (max-width: 900px) {
-  body::before,
-  body::after {
-    display: none;
+  .app-layout {
+    padding: 16px;
   }
 
-  .app-header {
-    flex-direction: column;
-    align-items: flex-start;
-    gap: 10px;
+  .history-sidebar {
+    position: fixed;
+    left: 0;
+    top: 0;
+    bottom: 0;
+    height: 100vh;
+    transform: translateX(-110%);
+    transition: transform 0.32s ease;
+    z-index: 10000;
+    width: 84%;
+    max-width: 340px;
+  }
+
+  .history-sidebar.sidebar-open {
+    transform: translateX(0%);
+  }
+
+  .history-overlay {
+    position: fixed;
+    inset: 0;
+    background: rgba(0,0,0,0.35);
+    opacity: 0;
+    visibility: hidden;
+    transition: opacity 0.28s ease, visibility 0.28s ease;
+    z-index: 9998;
+  }
+
+  .history-overlay.visible {
+    opacity: 1;
+    visibility: visible;
+  }
+
+  .history-toggle {
+    display: inline-flex;
+  }
+
+  /* Desktop: chat becomes full width when sidebar hidden */
+  .chat-app {
+    width: 100%;
   }
 }
 

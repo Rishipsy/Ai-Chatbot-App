@@ -17,28 +17,46 @@
     </div>
   </div>
 
-  <main class="chat-app">
-    <header class="app-header">
-      <div class="header-left">
-        <h1>AI Chatbot</h1>
-        <p class="app-description">Ask me anything, powered by Gemini AI</p>
+  <div class="app-layout">
+    <aside id="historySidebar" class="history-sidebar" aria-hidden="true">
+      <div class="history-header">
+        <h3>Recent Questions</h3>
+        <button id="clearHistoryBtn" class="clear-history-button" aria-label="Clear history" title="Clear history">Clear</button>
       </div>
-      <div class="header-right">
-        <button id="themeToggle" class="theme-toggle" aria-label="Toggle theme">🌙</button>
+      <div class="history-body">
+        <ul id="historyList" class="history-list" role="list">
+          <!-- History items inserted here -->
+        </ul>
+        <div id="historyEmpty" class="history-empty">No questions yet</div>
       </div>
-    </header>
+    </aside>
 
-    <section id="chatMessages" class="chat-messages" aria-label="Chat messages">
-      <div id="loadingIndicator" class="loading-indicator visually-hidden">Typing...</div>
-      <div id="errorMessage" class="error-message" aria-live="polite"></div>
-    </section>
+    <main class="chat-app">
+      <header class="app-header">
+        <div class="header-left">
+          <h1>AI Chatbot</h1>
+          <p class="app-description">Ask me anything, powered by Gemini AI</p>
+        </div>
+        <div class="header-right">
+          <button id="historyToggle" class="history-toggle" aria-label="Open history" title="Recent questions">☰</button>
+          <button id="themeToggle" class="theme-toggle" aria-label="Toggle theme">🌙</button>
+        </div>
+      </header>
 
-    <footer class="input-area">
-      <input id="messageInput" class="message-input" type="text" placeholder="Type your message..." aria-label="Type your message" />
-      <button id="micButton" class="mic-button" type="button" aria-label="Start voice input">🎤</button>
-      <button id="sendButton" class="send-button" type="button">Send</button>
-    </footer>
-  </main>
+      <section id="chatMessages" class="chat-messages" aria-label="Chat messages">
+        <div id="loadingIndicator" class="loading-indicator visually-hidden">Typing...</div>
+        <div id="errorMessage" class="error-message" aria-live="polite"></div>
+      </section>
+
+      <footer class="input-area">
+        <input id="messageInput" class="message-input" type="text" placeholder="Type your message..." aria-label="Type your message" />
+        <button id="micButton" class="mic-button" type="button" aria-label="Start voice input">🎤</button>
+        <button id="sendButton" class="send-button" type="button">Send</button>
+      </footer>
+    </main>
+  </div>
+
+  <div id="historyOverlay" class="history-overlay" aria-hidden="true"></div>
 
   <script src="/static/js/script.js"></script>
 </body>

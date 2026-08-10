@@ -228,6 +228,161 @@ document.addEventListener('DOMContentLoaded', function () {
     chatMessages.scrollTop = chatMessages.scrollHeight;
   }
 
+  var historyList = document.getElementById('historyList');
+  var historyEmpty = document.getElementById('historyEmpty');
+  var historySidebar = document.getElementById('historySidebar');
+  var historyOverlay = document.getElementById('historyOverlay');
+  var historyToggleBtn = document.getElementById('historyToggle');
+
+  // History: localStorage-backed recent questions (most recent first)
+  var HISTORY_KEY = 'chatbotHistory';
+  var historyItems = [];
+
+  function loadHistory() {
+    try {
+      var raw = localStorage.getItem(HISTORY_KEY);
+      var parsed = raw ? JSON.parse(raw) : [];
+      // Support legacy format (array of strings) and new format (array of objects {question, ts})
+      if (!Array.isArray(parsed)) {
+        historyItems = [];
+      } else if (parsed.length > 0 && typeof parsed[0] === 'string') {
+        // convert to objects, preserve original order
+        historyItems = parsed.map(function (s) { return { question: s, ts: Date.now() }; });
+      } else {
+        historyItems = parsed;
+      }
+    } catch (e) {
+      historyItems = [];
+    }
+  }
+
+  function saveHistory() {
+    try { localStorage.setItem(HISTORY_KEY, JSON.stringify(historyItems)); } catch (e) { /* ignore */ }
+  }
+
+  function formatTimestamp(ts) {
+    try {
+      var d = new Date(ts);
+      // Simple locale string; useful and readable for most cases
+      return d.toLocaleString();
+    } catch (e) {
+      return '';
+    }
+  }
+
+  function renderHistory() {
+    if (!historyList) return;
+    historyList.innerHTML = '';
+    if (!historyItems || historyItems.length === 0) {
+      if (historyEmpty) historyEmpty.style.display = 'block';
+      return;
+    }
+    if (historyEmpty) historyEmpty.style.display = 'none';
+    historyItems.forEach(function (item) {
+      var q = item && item.question ? item.question : (item || '');
+      var ts = item && item.ts ? item.ts : null;
+      var li = document.createElement('li');
+      li.className = 'history-item';
+      li.setAttribute('role', 'button');
+      li.setAttribute('tabindex', '0');
+
+      var textSpan = document.createElement('div');
+      textSpan.className = 'history-text';
+      textSpan.textContent = q;
+
+      var tsSpan = document.createElement('div');
+      tsSpan.className = 'history-ts';
+      tsSpan.textContent = ts ? formatTimestamp(ts) : '';
+
+      li.appendChild(textSpan);
+      li.appendChild(tsSpan);
+
+      li.dataset.question = q;
+      if (ts) li.dataset.ts = ts;
+      historyList.appendChild(li);
+    });
+  }
+
+  function addToHistory(q) {
+    if (!q) return;
+    // remove exact duplicate if present (by question text)
+    historyItems = historyItems.filter(function (item) { return item.question !== q; });
+    // add new object with timestamp
+    historyItems.unshift({ question: q, ts: Date.now() });
+    historyItems = historyItems.slice(0, 5);
+    saveHistory();
+    renderHistory();
+  }
+
+  function closeSidebar() {
+    if (historySidebar) historySidebar.classList.remove('sidebar-open');
+    if (historyOverlay) historyOverlay.classList.remove('visible');
+  }
+
+  function openSidebar() {
+    if (historySidebar) historySidebar.classList.add('sidebar-open');
+    if (historyOverlay) historyOverlay.classList.add('visible');
+  }
+
+  // Initialize history UI
+  loadHistory();
+  renderHistory();
+
+  // Clear history button
+  var clearHistoryBtn = document.getElementById('clearHistoryBtn');
+  if (clearHistoryBtn) {
+    clearHistoryBtn.addEventListener('click', function () {
+      historyItems = [];
+      saveHistory();
+      renderHistory();
+    });
+  }
+
+  // Click handlers for history list (event delegation)
+  if (historyList) {
+    historyList.addEventListener('click', function (e) {
+      var li = e.target.closest('li.history-item');
+      if (!li) return;
+      var q = li.dataset.question || li.textContent || '';
+      if (messageInput) {
+        messageInput.value = q;
+        messageInput.focus();
+      }
+      // close on mobile
+      closeSidebar();
+    });
+
+    // allow keyboard activation
+    historyList.addEventListener('keydown', function (e) {
+      if (e.key === 'Enter' || e.key === ' ') {
+        var li = e.target.closest('li.history-item');
+        if (!li) return;
+        var q = li.dataset.question || li.textContent || '';
+        if (messageInput) {
+          messageInput.value = q;
+          messageInput.focus();
+        }
+        closeSidebar();
+      }
+    });
+  }
+
+  // Overlay click to close
+  if (historyOverlay) {
+    historyOverlay.addEventListener('click', function () { closeSidebar(); });
+  }
+
+  // Toggle button for mobile
+  if (historyToggleBtn) {
+    historyToggleBtn.addEventListener('click', function () {
+      if (historySidebar && historySidebar.classList.contains('sidebar-open')) {
+        closeSidebar();
+      } else {
+        openSidebar();
+      }
+    });
+  }
+
   setupVoiceInput();
 
   async function sendMessage() {
@@ -246,6 +401,8 @@ document.addEventListener('DOMContentLoaded', function () {
     messageInput.disabled = true;
 
     appendMessage(message, 'user');
+    // store in history (most recent first), persist and re-render
+    try { addToHistory(message); } catch (e) { /* ignore history errors */ }
     messageInput.value = '';
     showLoading(true);
 

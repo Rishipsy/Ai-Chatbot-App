@@ -169,53 +169,42 @@ body {
 }
 
 
+/* Decorative background blobs — reduced size and positioned out toward the page edges so they don't overlap centered hero content */
 body::before,
 body::after {
   content: '';
   position: fixed;
-  z-index: -1;
+  z-index: -1; /* behind all content */
   border-radius: 50%;
-  filter: blur(80px);
-  opacity: 0.45;
+  filter: blur(64px);
+  opacity: 0.35;
   pointer-events: none;
 }
 
 body::before {
-  width: 320px;
-  height: 320px;
-  top: 8%;
-  left: 5%;
+  width: 220px;
+  height: 220px;
+  top: 6%;
+  left: 2%;
   background: radial-gradient(circle at 30% 30%, var(--blob-a), transparent 60%);
-  animation: floatBlobA 12s ease-in-out infinite;
 }
 
 body::after {
-  width: 260px;
-  height: 260px;
-  bottom: 10%;
-  right: 4%;
+  width: 200px;
+  height: 200px;
+  bottom: 6%;
+  right: 2%;
   background: radial-gradient(circle at 40% 40%, var(--blob-b), transparent 60%);
-  animation: floatBlobB 14s ease-in-out infinite;
 }
 
 @keyframes floatBlobA {
-  0%,
-  100% {
-    transform: translate(0, 0);
-  }
-  50% {
-    transform: translate(10px, 18px);
-  }
+  0%, 100% { transform: translate(0,0); }
+  50% { transform: translate(6px,10px); }
 }
 
 @keyframes floatBlobB {
-  0%,
-  100% {
-    transform: translate(0, 0);
-  }
-  50% {
-    transform: translate(-12px, -14px);
-  }
+  0%, 100% { transform: translate(0,0); }
+  50% { transform: translate(-6px,-8px); }
 }
 
 button,
@@ -224,18 +213,6 @@ input {
 }
 
 /* Chat app container */
-.chat-app {
-  display: flex;
-  flex-direction: column;
-  min-height: 100vh;
-  padding: 24px;
-  /* In the combined layout the chat should grow to fill available space */
-  flex: 1 1 720px;
-  min-width: 0; /* allow flex children to shrink properly */
-  max-width: 820px;
-  margin: 0; /* remove auto-centering inside flex so the whole layout can be centered as a unit */
-  background: radial-gradient(circle at top, rgba(59, 130, 246, 0.16), transparent 35%);
-}
 
 .app-header {
   padding: 28px 24px 26px;
@@ -280,32 +257,74 @@ input {
 }
 
 /* Remove old ::before empty-state — we use a real hero element now */
-.chat-messages::after {
-  /* keep subtle decorative circle but don't show the previous text placeholder */
-  content: '';
-  position: absolute;
-  width: 120px;
-  height: 120px;
-  border-radius: 50%;
-  background: rgba(37, 99, 235, 0.14);
-  top: 24%;
-  left: 50%;
-  transform: translateX(-50%);
-  pointer-events: none;
-}
 
 /* Hero shown when there are no message rows */
 .chat-hero {
-  position: absolute;
-  inset: 0;
+  /* Normal document-flow hero block — centered vertically when chat is empty via parent rules */
+  position: relative; /* keep it in flow */
   display: flex;
   flex-direction: column;
   align-items: center;
   justify-content: center;
-  gap: 24px; /* generous spacing between title, subtitle and input */
-  pointer-events: none; /* allow clicking through to input */
+  gap: 28px; /* generous spacing between title, subtitle, suggestions and input */
+  pointer-events: none; /* allow clicking through to input; child elements enable pointer-events when needed */
   transition: opacity 0.32s ease, transform 0.32s ease;
   opacity: 1;
+  padding: 8px 0;
+}
+
+/* Suggestion grid shown in hero state */
+.suggestion-grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 16px;
+  width: 100%;
+  max-width: 900px;
+  pointer-events: auto; /* allow clicking suggestions even though parent is pointer-events:none */
+  justify-items: stretch;
+}
+
+.suggestion-card {
+  display: flex;
+  flex-direction: column; /* stack icon/label above description for clarity */
+  align-items: flex-start;
+  gap: 8px;
+  padding: 16px 18px; /* increased padding for breathing room */
+  border-radius: 12px;
+  background: linear-gradient(180deg, rgba(255,255,255,0.02), rgba(255,255,255,0.01));
+  border: 1px solid var(--border-color);
+  cursor: pointer;
+  text-align: left;
+  min-height: 88px; /* ensure enough room for wrapped text */
+}
+
+.suggestion-card .suggestion-icon {
+  font-size: 1.5rem;
+  line-height: 1;
+  display: block;
+}
+
+.suggestion-card .suggestion-label {
+  font-size: 0.95rem;
+  font-weight: 700;
+  color: var(--text-color);
+}
+
+.suggestion-card .suggestion-text {
+  display: block;
+  font-size: 0.9rem;
+  color: var(--muted-text);
+  line-height: 1.32;
+  margin-top: 6px;
+}
+
+.suggestion-card:hover {
+  background: rgba(0,0,0,0.04);
+  transform: translateY(-3px);
+}
+
+@media (max-width: 900px) {
+  .suggestion-grid { grid-template-columns: 1fr; width: 92%; }
 }
 
 /* hide hero when messages exist */
@@ -548,28 +567,34 @@ input {
 }
 
 /* Input area - positioned inside chat-messages so it can act as hero input and dock to bottom */
-.chat-messages .input-area {
-  position: absolute;
-  left: 50%;
-  transform: translateX(-50%);
-  width: min(900px, 90%);
-  display: flex;
-  justify-content: center;
-  padding: 0;
-  pointer-events: auto; /* allow interaction */
-  z-index: 4;
-  /* default: place the pill slightly below the hero text when empty */
-  top: 62%;
+/* Layout behavior for chat-messages: center hero content by default; when message rows exist, switch to normal top-aligned conversation flow */
+.chat-messages {
+  /* existing properties remain; override alignment for hero/empty state */
+  justify-content: center; /* center hero vertically when empty */
+  align-items: center;    /* center items horizontally when empty */
 }
 
-/* When conversation is active, dock the input to the bottom of the chat area */
+.chat-messages:has(.message-row) {
+  justify-content: flex-start; /* normal conversation flow */
+  align-items: stretch;        /* stretch children to full width */
+}
+
+/* Input area participates in normal document flow — placed after hero content; will be pushed to bottom when conversation is active via margin-top:auto */
+.chat-messages .input-area {
+  position: static;
+  width: 100%;
+  display: flex;
+  justify-content: center;
+  padding: 12px 0 0;
+  pointer-events: auto;
+  z-index: 4;
+  margin-top: 12px;
+}
+
+/* Dock input to bottom when conversation is active */
 .chat-messages:has(.message-row) .input-area {
-  left: 24px;
-  right: 24px;
-  transform: none;
-  width: auto;
-  top: auto;
-  bottom: 18px;
+  margin-top: auto; /* push input to bottom of the chat card */
+  padding-bottom: 18px;
 }
 
 /* Unified pill container for input + buttons */
@@ -668,10 +693,10 @@ input {
   display: flex;
   gap: 24px; /* consistent spacing between sidebar and chat */
   align-items: flex-start; /* top-align sidebar and chat */
-  justify-content: center; /* center the combined unit horizontally */
+  justify-content: flex-start; /* keep sidebar pinned left; chat area fills remaining space */
   width: 100%;
-  max-width: 1160px; /* allow sidebar(280) + chat(820) + gap(24) to fit comfortably */
-  margin: 0 auto;
+  max-width: none; /* allow full-bleed so chat area centers within remaining space */
+  margin: 0;
   padding: 24px;
   box-sizing: border-box;
 }
@@ -681,7 +706,7 @@ input {
   background: var(--sidebar-bg);
   border: 1px solid var(--sidebar-border);
   border-radius: 12px;
-  width: 272px;
+  width: 280px;
   padding: 18px;
   box-shadow: var(--sidebar-shadow);
   position: relative;
@@ -689,10 +714,36 @@ input {
   display: flex;
   flex-direction: column;
   gap: 12px;
-  flex: 0 0 272px;
+  flex: 0 0 280px;
   height: calc(100vh - 80px);
   overflow: auto;
 }
+
+/* Main chat flexible area - grows to fill remaining horizontal space */
+.chat-app {
+  flex: 1 1 auto;
+  display: flex;
+  justify-content: center; /* center the chat column inside the remaining space */
+  align-items: flex-start;
+  padding: 0; /* padding moved to inner column */
+  box-sizing: border-box;
+}
+
+/* Inner chat column — the visual chat card that used to be .chat-app */
+.chat-column {
+  display: flex;
+  flex-direction: column;
+  min-height: 100vh;
+  padding: 24px;
+  /* In the combined layout the chat should grow to fill available space */
+  flex: 1 1 720px;
+  min-width: 0; /* allow flex children to shrink properly */
+  max-width: 900px; /* increased from 820px to allow more room for content */
+  width: 100%;
+  margin: 0; /* keep column centered within .chat-app flex area */
+  background: radial-gradient(circle at top, rgba(59, 130, 246, 0.16), transparent 35%);
+}
+
 
 .history-header {
   display: flex;
@@ -953,6 +1004,13 @@ input {
     width: 100%;
     max-width: 980px;
     margin: 0 auto;
+  }
+
+  .chat-column {
+    max-width: 980px;
+    width: 100%;
+    margin: 0 auto;
+    padding: 16px;
   }
 }
 

@@ -416,6 +416,34 @@ document.addEventListener('DOMContentLoaded', function () {
 
   setupVoiceInput();
 
+  // Suggestion cards click handler (fills input but does not auto-send)
+  var suggestionGrid = document.querySelector('.suggestion-grid');
+  if (suggestionGrid) {
+    suggestionGrid.addEventListener('click', function (e) {
+      var card = e.target.closest('.suggestion-card');
+      if (!card) return;
+      var prompt = card.dataset.prompt || '';
+      if (messageInput) {
+        messageInput.value = prompt;
+        messageInput.focus();
+      }
+    });
+
+    // keyboard activation for accessibility
+    suggestionGrid.addEventListener('keydown', function (e) {
+      if (e.key === 'Enter' || e.key === ' ') {
+        var card = e.target.closest('.suggestion-card');
+        if (!card) return;
+        e.preventDefault();
+        var prompt = card.dataset.prompt || '';
+        if (messageInput) {
+          messageInput.value = prompt;
+          messageInput.focus();
+        }
+      }
+    });
+  }
+
   function setSendButtonStop() {
     if (!sendButton) return;
     stopMode = true;

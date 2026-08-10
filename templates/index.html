@@ -35,37 +35,66 @@
     </aside>
 
     <main class="chat-app">
-      <header class="app-header">
-        <div class="header-left">
-          <h1>AI Chatbot</h1>
-          <p class="app-description">Ask me anything, powered by Gemini AI</p>
-        </div>
-        <div class="header-right">
-          <button id="historyToggle" class="history-toggle" aria-label="Open history" title="Recent questions">☰</button>
-          <button id="themeToggle" class="theme-toggle" aria-label="Toggle theme">🌙</button>
-        </div>
-      </header>
-
-      <section id="chatMessages" class="chat-messages" aria-label="Chat messages">
-        <div id="loadingIndicator" class="loading-indicator visually-hidden">Typing...</div>
-        <div id="errorMessage" class="error-message" aria-live="polite"></div>
-
-        <!-- Hero shown when no messages are present -->
-        <div id="chatHero" class="chat-hero" aria-hidden="false">
-          <h2 class="hero-title">How can I help?</h2>
-          <p class="hero-sub">Ask me anything — powered by Gemini AI</p>
-        </div>
-
-        <!-- Input area is placed inside the chat messages area so it can appear as part of the hero when empty
-             and dock to the bottom when conversations exist. IDs are preserved for existing JS. -->
-        <div class="input-area">
-          <div class="input-pill">
-            <input id="messageInput" class="message-input" type="text" placeholder="Ask me anything" aria-label="Ask me anything" />
-            <button id="micButton" class="mic-button" type="button" aria-label="Start voice input">🎤</button>
-            <button id="sendButton" class="send-button" type="button" aria-label="Send message">➤<span class="sr-only">Send</span></button>
+      <div class="chat-column">
+        <header class="app-header">
+          <div class="header-left">
+            <h1>AI Chatbot</h1>
+            <p class="app-description">Ask me anything, powered by Gemini AI</p>
           </div>
-        </div>
-      </section>
+          <div class="header-right">
+            <button id="historyToggle" class="history-toggle" aria-label="Open history" title="Recent questions">☰</button>
+            <button id="themeToggle" class="theme-toggle" aria-label="Toggle theme">🌙</button>
+          </div>
+        </header>
+
+        <section id="chatMessages" class="chat-messages" aria-label="Chat messages">
+          <div id="loadingIndicator" class="loading-indicator visually-hidden">Typing...</div>
+          <div id="errorMessage" class="error-message" aria-live="polite"></div>
+
+          <!-- Hero shown when no messages are present -->
+          <div id="chatHero" class="chat-hero" aria-hidden="false">
+            <h2 class="hero-title">How can I help?</h2>
+            <p class="hero-sub">Ask me anything — powered by Gemini AI</p>
+
+            <!-- Suggestion grid (visible in empty/hero state only) -->
+            <div class="suggestion-grid" aria-hidden="false">
+              <button class="suggestion-card" data-prompt="Explain how neural networks work" type="button">
+                <span class="suggestion-icon">💡</span>
+                <span class="suggestion-label">Explain a concept</span>
+                <span class="suggestion-text">Explain how neural networks work</span>
+              </button>
+
+              <button class="suggestion-card" data-prompt="Write a short article about climate change" type="button">
+                <span class="suggestion-icon">📝</span>
+                <span class="suggestion-label">Write something</span>
+                <span class="suggestion-text">Write a short article about climate change</span>
+              </button>
+
+              <button class="suggestion-card" data-prompt="Help me debug this Python error" type="button">
+                <span class="suggestion-icon">🧠</span>
+                <span class="suggestion-label">Solve a problem</span>
+                <span class="suggestion-text">Help me debug this Python error</span>
+              </button>
+
+              <button class="suggestion-card" data-prompt="Give me 5 project ideas for a hackathon" type="button">
+                <span class="suggestion-icon">🔍</span>
+                <span class="suggestion-label">Get ideas</span>
+                <span class="suggestion-text">Give me 5 project ideas for a hackathon</span>
+              </button>
+            </div>
+          </div>
+
+          <!-- Input area is placed inside the chat messages area so it can appear as part of the hero when empty
+               and dock to the bottom when conversations exist. IDs are preserved for existing JS. -->
+          <div class="input-area">
+            <div class="input-pill">
+              <input id="messageInput" class="message-input" type="text" placeholder="Ask me anything" aria-label="Ask me anything" />
+              <button id="micButton" class="mic-button" type="button" aria-label="Start voice input">🎤</button>
+              <button id="sendButton" class="send-button" type="button" aria-label="Send message">➤<span class="sr-only">Send</span></button>
+            </div>
+          </div>
+        </section>
+      </div>
     </main>
   </div>
 

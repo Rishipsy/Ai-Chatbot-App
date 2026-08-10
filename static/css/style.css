@@ -405,6 +405,7 @@ input {
   border-color: #2563eb;
 }
 
+.mic-button,
 .send-button {
   min-width: 100px;
   padding: 0 18px;
@@ -416,15 +417,49 @@ input {
   cursor: pointer;
   transition: transform 0.18s ease, background-color 0.18s ease, box-shadow 0.18s ease;
   box-shadow: 0 10px 20px rgba(37, 99, 235, 0.18);
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
 }
 
+.mic-button {
+  width: 48px;
+  min-width: 48px;
+  padding: 0;
+  font-size: 1.1rem;
+}
+
+.mic-button:hover,
+.mic-button:focus-visible,
 .send-button:hover,
 .send-button:focus-visible {
   background: #1d4ed8;
 }
 
+.mic-button:active,
 .send-button:active {
   transform: scale(0.98);
+}
+
+.mic-button.listening {
+  animation: micPulse 1.2s ease-in-out infinite;
+  background: #dc2626;
+  box-shadow: 0 0 0 0 rgba(220, 38, 38, 0.4);
+}
+
+@keyframes micPulse {
+  0% {
+    transform: scale(1);
+    box-shadow: 0 0 0 0 rgba(220, 38, 38, 0.4);
+  }
+  50% {
+    transform: scale(1.03);
+    box-shadow: 0 0 0 12px rgba(220, 38, 38, 0.12);
+  }
+  100% {
+    transform: scale(1);
+    box-shadow: 0 0 0 0 rgba(220, 38, 38, 0.4);
+  }
 }
 
 /* Mobile responsiveness */

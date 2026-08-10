@@ -4,10 +4,13 @@ document.addEventListener('DOMContentLoaded', function () {
   var errorMessage = document.getElementById('errorMessage');
   var messageInput = document.getElementById('messageInput');
   var sendButton = document.getElementById('sendButton');
+  var micButton = document.getElementById('micButton');
 
   var isSending = false;
   var errorTimeout = null;
   var loadingRow = null;
+  var recognition = null;
+  var isListening = false;
 
   function escapeHtml(text) {
     return text
@@ -104,6 +107,62 @@ document.addEventListener('DOMContentLoaded', function () {
     }
   }
 
+  function setupVoiceInput() {
+    if (!micButton) {
+      return;
+    }
+
+    var SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+    if (!SpeechRecognition) {
+      micButton.style.display = 'none';
+      return;
+    }
+
+    recognition = new SpeechRecognition();
+    recognition.lang = 'en-US';
+    recognition.continuous = false;
+    recognition.interimResults = false;
+
+    recognition.onstart = function () {
+      isListening = true;
+      micButton.classList.add('listening');
+    };
+
+    recognition.onresult = function (event) {
+      var transcript = '';
+      if (event.results && event.results[0] && event.results[0][0]) {
+        transcript = event.results[0][0].transcript;
+      }
+      if (transcript) {
+        messageInput.value = transcript;
+        messageInput.focus();
+      }
+    };
+
+    recognition.onend = function () {
+      isListening = false;
+      micButton.classList.remove('listening');
+    };
+
+    recognition.onerror = function () {
+      isListening = false;
+      micButton.classList.remove('listening');
+      showError('Voice input failed, please try again or type your message.');
+    };
+
+    micButton.addEventListener('click', function () {
+      if (isListening) {
+        recognition.stop();
+        return;
+      }
+      try {
+        recognition.start();
+      } catch (error) {
+        showError('Voice input failed, please try again or type your message.');
+      }
+    });
+  }
+
   function showError(text) {
     if (!errorMessage) {
       return;
@@ -140,6 +199,8 @@ document.addEventListener('DOMContentLoaded', function () {
   function scrollChatToBottom() {
     chatMessages.scrollTop = chatMessages.scrollHeight;
   }
+
+  setupVoiceInput();
 
   async function sendMessage() {
     if (isSending) {

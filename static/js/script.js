@@ -81,11 +81,31 @@ document.addEventListener('DOMContentLoaded', function () {
     showLoading(true);
 
     try {
-      // TODO: Phase 8 will add the actual fetch('/api/chat') call here
-      await new Promise(function (resolve) {
-        setTimeout(resolve, 1000);
+      var response = await fetch('/api/chat', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ message: message }),
       });
-      appendMessage('This is a placeholder response', 'ai');
+
+      if (!response.ok) {
+        var errorText = await response.text();
+        showError('Server error. Please try again.');
+        return;
+      }
+
+      var data = await response.json();
+      if (data.error) {
+        showError(data.error);
+        return;
+      }
+
+      if (typeof data.response === 'string') {
+        appendMessage(data.response, 'ai');
+      } else {
+        showError('Unexpected response from server.');
+      }
     } catch (error) {
       showError('Unable to send message. Please try again.');
     } finally {

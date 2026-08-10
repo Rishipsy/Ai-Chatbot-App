@@ -1,7 +1,7 @@
 import os
 
 from dotenv import load_dotenv
-from flask import Flask, render_template
+from flask import Flask, jsonify, render_template, request
 from google import genai
 
 load_dotenv()
@@ -34,6 +34,24 @@ def get_gemini_response(user_message: str) -> str:
             text_parts.append(part.text)
 
     return ''.join(text_parts).strip()
+
+
+@app.route('/api/chat', methods=['POST'])
+def chat():
+    data = request.get_json(silent=True)
+    message = None
+
+    if isinstance(data, dict):
+        message = data.get('message')
+
+    try:
+        if message is None:
+            raise ValueError('Missing message field in request body')
+
+        response_text = get_gemini_response(message)
+        return jsonify({'response': response_text})
+    except Exception as exc:
+        return jsonify({'error': str(exc)}), 500
 
 
 @app.route('/')

@@ -1,14 +1,19 @@
+import logging
 import os
 
 from dotenv import load_dotenv
 from flask import Flask, jsonify, render_template, request
 from google import genai
+from google.genai.errors import APIError
 
 load_dotenv()
 
+logging.basicConfig(level=logging.INFO)
+logger = logging.getLogger(__name__)
+
 gemini_api_key = os.getenv('GEMINI_API_KEY')
 if not gemini_api_key:
-    print('Warning: GEMINI_API_KEY is not set. Gemini API calls will fail until it is configured.')
+    logger.warning('GEMINI_API_KEY is not set. Gemini API calls will fail until it is configured.')
 
 gemini_client = genai.Client(api_key=gemini_api_key)
 
@@ -38,20 +43,43 @@ def get_gemini_response(user_message: str) -> str:
 
 @app.route('/api/chat', methods=['POST'])
 def chat():
-    data = request.get_json(silent=True)
-    message = None
+    if not request.is_json:
+        logger.error('Invalid JSON request: content type is not application/json')
+        return jsonify({'error': 'Invalid JSON'}), 400
 
-    if isinstance(data, dict):
-        message = data.get('message')
+    data = request.get_json(silent=True)
+    if not isinstance(data, dict):
+        logger.error('Invalid JSON request body: expected a JSON object')
+        return jsonify({'error': 'Invalid JSON'}), 400
+
+    if 'message' not in data:
+        logger.error('Missing message field in JSON body')
+        return jsonify({'error': 'Missing message field'}), 400
+
+    message = data['message']
+    if not isinstance(message, str):
+        logger.error('Invalid message type: expected string')
+        return jsonify({'error': 'Message must be a string'}), 400
+
+    trimmed_message = message.strip()
+    if not trimmed_message:
+        logger.error('Empty message after trimming whitespace')
+        return jsonify({'error': 'Message must not be empty'}), 400
+
+    max_length = 2000
+    if len(message) > max_length:
+        logger.error('Message too long: length %d exceeds limit %d', len(message), max_length)
+        return jsonify({'error': f'Message must be at most {max_length} characters'}), 400
 
     try:
-        if message is None:
-            raise ValueError('Missing message field in request body')
-
-        response_text = get_gemini_response(message)
+        response_text = get_gemini_response(trimmed_message)
         return jsonify({'response': response_text})
+    except APIError as exc:
+        logger.error('Gemini API error while handling /api/chat', exc_info=exc)
+        return jsonify({'error': 'AI service is currently unavailable, please try again'}), 503
     except Exception as exc:
-        return jsonify({'error': str(exc)}), 500
+        logger.error('Unexpected error in /api/chat', exc_info=exc)
+        return jsonify({'error': 'Something went wrong'}), 500
 
 
 @app.route('/')

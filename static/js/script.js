@@ -7,6 +7,7 @@ document.addEventListener('DOMContentLoaded', function () {
 
   var isSending = false;
   var errorTimeout = null;
+  var loadingRow = null;
 
   function escapeHtml(text) {
     return text
@@ -48,8 +49,17 @@ document.addEventListener('DOMContentLoaded', function () {
   }
 
   function appendMessage(text, type) {
+    var row = document.createElement('div');
+    row.className = 'message-row ' + (type === 'user' ? 'user-row' : 'ai-row');
+
+    var avatar = document.createElement('div');
+    avatar.className = 'avatar ' + (type === 'user' ? 'user-avatar' : 'ai-avatar');
+    avatar.innerHTML = type === 'user'
+      ? '<svg width="20" height="20" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M12 12a4 4 0 100-8 4 4 0 000 8zm-6 8a1 1 0 011-1h10a1 1 0 011 1v1H6v-1zm3-2a6 6 0 0112 0v1H6v-1zm0 0" fill="currentColor"/></svg>'
+      : '<svg width="20" height="20" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M7 4h10v2H7V4zm2 2V4h2v2H9zm4 0V4h2v2h-2zM6 8h12v8a2 2 0 01-2 2H8a2 2 0 01-2-2V8zm2 2h8v4H8v-4z" fill="currentColor"/></svg>';
+
     var bubble = document.createElement('div');
-    bubble.className = type === 'user' ? 'user-message' : 'ai-message';
+    bubble.className = (type === 'user' ? 'user-message' : 'ai-message') + ' message-bubble';
 
     if (type === 'ai') {
       bubble.innerHTML = formatAIResponse(text);
@@ -57,15 +67,40 @@ document.addEventListener('DOMContentLoaded', function () {
       bubble.textContent = text;
     }
 
-    chatMessages.appendChild(bubble);
+    row.appendChild(avatar);
+    row.appendChild(bubble);
+    chatMessages.appendChild(row);
     scrollChatToBottom();
   }
 
   function showLoading(show) {
     if (show) {
-      loadingIndicator.style.display = 'block';
+      if (!loadingRow) {
+        loadingRow = document.createElement('div');
+        loadingRow.className = 'message-row ai-row loading-row';
+
+        var avatar = document.createElement('div');
+        avatar.className = 'avatar ai-avatar';
+        avatar.innerHTML = '<svg width="20" height="20" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M7 4h10v2H7V4zm2 2V4h2v2H9zm4 0V4h2v2h-2zM6 8h12v8a2 2 0 01-2 2H8a2 2 0 01-2-2V8zm2 2h8v4H8v-4z" fill="currentColor"/></svg>';
+
+        var bubble = document.createElement('div');
+        bubble.className = 'ai-message message-bubble loading-message';
+        bubble.innerHTML =
+          '<span class="loading-dots" aria-hidden="true"><span></span><span></span><span></span></span>' +
+          '<span class="loading-text">AI is typing...</span>';
+
+        loadingRow.appendChild(avatar);
+        loadingRow.appendChild(bubble);
+      }
+
+      if (!chatMessages.contains(loadingRow)) {
+        chatMessages.appendChild(loadingRow);
+      }
+      scrollChatToBottom();
     } else {
-      loadingIndicator.style.display = 'none';
+      if (loadingRow && loadingRow.parentNode) {
+        loadingRow.parentNode.removeChild(loadingRow);
+      }
     }
   }
 

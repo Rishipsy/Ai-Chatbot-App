@@ -747,6 +747,55 @@ input {
   background: rgba(0,0,0,0.04);
 }
 
+/* New Chat button at top of sidebar */
+.new-chat-button {
+  width: 100%;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  padding: 10px 12px;
+  border-radius: 10px;
+  background: transparent;
+  color: var(--accent);
+  border: 1px solid var(--accent);
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.new-chat-button:hover {
+  background: rgba(37, 99, 235, 0.06);
+}
+
+[data-theme="dark"] .new-chat-button {
+  color: var(--accent);
+  border-color: rgba(96,165,250,0.28);
+}
+
+/* Send button stop state */
+.send-button.stop-mode,
+.send-button.stop-mode:hover {
+  background: var(--danger);
+  color: #ffffff;
+  box-shadow: none;
+}
+
+/* System note (e.g., Response stopped) */
+.system-note-row {
+  display: flex;
+  justify-content: center;
+  margin: 8px 0;
+}
+
+.system-note {
+  font-size: 0.85rem;
+  color: var(--muted-text);
+  background: transparent;
+  padding: 6px 10px;
+  border-radius: 8px;
+  text-align: center;
+}
+
 .history-body {
   display: block;
 }

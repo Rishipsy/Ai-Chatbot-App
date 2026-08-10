@@ -11,6 +11,8 @@ document.addEventListener('DOMContentLoaded', function () {
   var loadingRow = null;
   var recognition = null;
   var isListening = false;
+  var currentController = null;
+  var stopMode = false;
 
   // Theme initialization: use saved preference or system preference when no saved value
   var themeToggle = document.getElementById('themeToggle');
@@ -338,6 +340,35 @@ document.addEventListener('DOMContentLoaded', function () {
     });
   }
 
+  // New Chat button - clears current conversation but preserves history
+  var newChatButton = document.getElementById('newChatButton');
+  if (newChatButton) {
+    newChatButton.addEventListener('click', function () {
+      // abort any in-flight request first
+      if (currentController) {
+        try { currentController.abort(); } catch (e) { /* ignore */ }
+      }
+      // remove message rows and system notes but keep hero, input-area, loadingIndicator, errorMessage
+      var children = Array.from(chatMessages.children);
+      children.forEach(function (child) {
+        if (child.classList && (child.classList.contains('message-row') || child.classList.contains('system-note-row') || child.classList.contains('loading-row'))) {
+          if (child.parentNode) child.parentNode.removeChild(child);
+        }
+      });
+      // ensure loading is hidden and errors cleared
+      showLoading(false);
+      clearError();
+      isSending = false;
+      currentController = null;
+      setSendButtonSend();
+      if (messageInput) {
+        messageInput.disabled = false;
+        messageInput.value = '';
+        messageInput.focus();
+      }
+    });
+  }
+
   // Click handlers for history list (event delegation)
   if (historyList) {
     historyList.addEventListener('click', function (e) {
@@ -385,6 +416,36 @@ document.addEventListener('DOMContentLoaded', function () {
 
   setupVoiceInput();
 
+  function setSendButtonStop() {
+    if (!sendButton) return;
+    stopMode = true;
+    sendButton.classList.add('stop-mode');
+    // show square stop icon + accessible label
+    sendButton.innerHTML = '■<span class="sr-only">Stop</span>';
+    sendButton.setAttribute('aria-label', 'Stop response');
+  }
+
+  function setSendButtonSend() {
+    if (!sendButton) return;
+    stopMode = false;
+    sendButton.classList.remove('stop-mode');
+    sendButton.innerHTML = '➤<span class="sr-only">Send</span>';
+    sendButton.setAttribute('aria-label', 'Send message');
+  }
+
+  function appendSystemNote(text) {
+    try {
+      var noteRow = document.createElement('div');
+      noteRow.className = 'system-note-row';
+      var note = document.createElement('div');
+      note.className = 'system-note';
+      note.textContent = text;
+      noteRow.appendChild(note);
+      chatMessages.appendChild(noteRow);
+      scrollChatToBottom();
+    } catch (e) { /* ignore append errors */ }
+  }
+
   async function sendMessage() {
     if (isSending) {
       return;
@@ -397,7 +458,7 @@ document.addEventListener('DOMContentLoaded', function () {
 
     clearError();
     isSending = true;
-    sendButton.disabled = true;
+    // keep sendButton enabled so user can click to STOP; use stop-mode visuals
     messageInput.disabled = true;
 
     appendMessage(message, 'user');
@@ -406,6 +467,11 @@ document.addEventListener('DOMContentLoaded', function () {
     messageInput.value = '';
     showLoading(true);
 
+    // prepare abort controller for this request
+    var controller = new AbortController();
+    currentController = controller;
+    setSendButtonStop();
+
     try {
       var response = await fetch('/api/chat', {
         method: 'POST',
@@ -413,6 +479,7 @@ document.addEventListener('DOMContentLoaded', function () {
           'Content-Type': 'application/json',
         },
         body: JSON.stringify({ message: message }),
+        signal: controller.signal,
       });
 
       if (!response.ok) {
@@ -433,17 +500,30 @@ document.addEventListener('DOMContentLoaded', function () {
         showError('Unexpected response from server.');
       }
     } catch (error) {
-      showError('Unable to send message. Please try again.');
+      if (error && error.name === 'AbortError') {
+        // request was intentionally aborted by user
+        // remove loading indicator and append a subtle system note
+        appendSystemNote('Response stopped');
+      } else {
+        showError('Unable to send message. Please try again.');
+      }
     } finally {
       showLoading(false);
       isSending = false;
-      sendButton.disabled = false;
+      // clear controller reference and reset button
+      currentController = null;
+      setSendButtonSend();
       messageInput.disabled = false;
       messageInput.focus();
     }
   }
 
   sendButton.addEventListener('click', function () {
+    // if a request is active, clicking acts as Stop
+    if (currentController) {
+      try { currentController.abort(); } catch (e) { /* ignore */ }
+      return;
+    }
     sendMessage();
   });
 

@@ -1,0 +1,29 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>AI Chatbot</title>
+  <link rel="stylesheet" href="/static/css/style.css" />
+</head>
+<body>
+  <main class="chat-app">
+    <header class="app-header">
+      <h1>AI Chatbot</h1>
+      <p class="app-description">Ask me anything, powered by Gemini AI</p>
+    </header>
+
+    <section id="chatMessages" class="chat-messages" aria-label="Chat messages">
+      <div id="loadingIndicator" class="loading-indicator visually-hidden">Typing...</div>
+      <div id="errorMessage" class="error-message" aria-live="polite"></div>
+    </section>
+
+    <footer class="input-area">
+      <input id="messageInput" class="message-input" type="text" placeholder="Type your message..." aria-label="Type your message" />
+      <button id="sendButton" class="send-button" type="button">Send</button>
+    </footer>
+  </main>
+
+  <script src="/static/js/script.js"></script>
+</body>
+</html>

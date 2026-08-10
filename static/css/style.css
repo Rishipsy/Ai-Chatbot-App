@@ -215,8 +215,11 @@ input {
   flex-direction: column;
   min-height: 100vh;
   padding: 24px;
-  max-width: 980px;
-  margin: 0 auto;
+  /* In the combined layout the chat should grow to fill available space */
+  flex: 1 1 720px;
+  min-width: 0; /* allow flex children to shrink properly */
+  max-width: 820px;
+  margin: 0; /* remove auto-centering inside flex so the whole layout can be centered as a unit */
   background: radial-gradient(circle at top, rgba(59, 130, 246, 0.16), transparent 35%);
 }
 
@@ -597,11 +600,14 @@ input {
 /* Layout: sidebar + chat */
 .app-layout {
   display: flex;
-  gap: 20px;
-  align-items: flex-start;
-  max-width: 1200px;
+  gap: 24px; /* consistent spacing between sidebar and chat */
+  align-items: flex-start; /* top-align sidebar and chat */
+  justify-content: center; /* center the combined unit horizontally */
+  width: 100%;
+  max-width: 1160px; /* allow sidebar(280) + chat(820) + gap(24) to fit comfortably */
   margin: 0 auto;
   padding: 24px;
+  box-sizing: border-box;
 }
 
 .history-sidebar {
@@ -717,6 +723,8 @@ input {
 @media (max-width: 900px) {
   .app-layout {
     padding: 16px;
+    /* On mobile, stack naturally; allow chat to center as before */
+    justify-content: center;
   }
 
   .history-sidebar {
@@ -755,9 +763,12 @@ input {
     display: inline-flex;
   }
 
-  /* Desktop: chat becomes full width when sidebar hidden */
+  /* On smaller screens, make the chat full width and centered like before */
   .chat-app {
+    flex: none;
     width: 100%;
+    max-width: 980px;
+    margin: 0 auto;
   }
 }
 

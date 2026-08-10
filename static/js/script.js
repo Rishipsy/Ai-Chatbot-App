@@ -58,27 +58,70 @@ document.addEventListener('DOMContentLoaded', function () {
     return blocks
       .map(function (block) {
         var lines = block.split('\n');
-        if (lines.every(function (line) { return /^\s*[-*]\s+/.test(line); })) {
-          var items = lines
-            .map(function (line) {
-              return '<li>' + line.replace(/^\s*[-*]\s+/, '') + '</li>';
-            })
-            .join('');
-          return '<ul>' + items + '</ul>';
+        var output = [];
+        var contentLines = [];
+
+        function formatContentLines(linesToFormat) {
+          if (!linesToFormat.length) return '';
+          if (linesToFormat.every(function (line) { return /^\s*[-*]\s+/.test(line); })) {
+            return '<ul>' + linesToFormat
+              .map(function (line) {
+                return '<li>' + line.replace(/^\s*[-*]\s+/, '') + '</li>';
+              })
+              .join('') + '</ul>';
+          }
+
+          if (linesToFormat.every(function (line) { return /^\s*\d+\.\s+/.test(line); })) {
+            return '<ol>' + linesToFormat
+              .map(function (line) {
+                return '<li>' + line.replace(/^\s*\d+\.\s+/, '') + '</li>';
+              })
+              .join('') + '</ol>';
+          }
+
+          return '<p>' + linesToFormat.join('<br>') + '</p>';
         }
 
-        if (lines.every(function (line) { return /^\s*\d+\.\s+/.test(line); })) {
-          var items = lines
-            .map(function (line) {
-              return '<li>' + line.replace(/^\s*\d+\.\s+/, '') + '</li>';
-            })
-            .join('');
-          return '<ol>' + items + '</ol>';
-        }
+        lines.forEach(function (line) {
+          var heading = line.match(/^(#{1,3})\s+(.+)$/);
+          if (heading) {
+            output.push(formatContentLines(contentLines));
+            contentLines = [];
+            output.push('<h' + (5 - heading[1].length) + '>' + heading[2] + '</h' + (5 - heading[1].length) + '>');
+          } else {
+            contentLines.push(line);
+          }
+        });
 
-        return '<p>' + lines.join('<br>') + '</p>';
+        output.push(formatContentLines(contentLines));
+        return output.join('');
       })
       .join('');
+  }
+
+  function revealAIResponse(bubble, text) {
+    var finalHtml = formatAIResponse(text);
+    var words = text.match(/\S+\s*/g) || [];
+    var wordIndex = 0;
+    var wordsPerStep = 3;
+
+    function revealNext() {
+      if (!bubble.isConnected) return;
+
+      wordIndex = Math.min(wordIndex + wordsPerStep, words.length);
+      bubble.innerHTML = formatAIResponse(words.slice(0, wordIndex).join('')) +
+        '<span class="typing-cursor" aria-hidden="true"></span>';
+      scrollChatToBottom();
+
+      if (wordIndex < words.length) {
+        setTimeout(revealNext, 24);
+      } else {
+        bubble.innerHTML = finalHtml;
+        scrollChatToBottom();
+      }
+    }
+
+    revealNext();
   }
 
   function appendMessage(text, type) {
@@ -94,16 +137,18 @@ document.addEventListener('DOMContentLoaded', function () {
     var bubble = document.createElement('div');
     bubble.className = (type === 'user' ? 'user-message' : 'ai-message') + ' message-bubble';
 
-    if (type === 'ai') {
-      bubble.innerHTML = formatAIResponse(text);
-    } else {
+    if (type !== 'ai') {
       bubble.textContent = text;
     }
 
     row.appendChild(avatar);
     row.appendChild(bubble);
     chatMessages.appendChild(row);
-    scrollChatToBottom();
+    if (type === 'ai') {
+      revealAIResponse(bubble, text);
+    } else {
+      scrollChatToBottom();
+    }
   }
 
   function showLoading(show) {
@@ -416,6 +461,22 @@ document.addEventListener('DOMContentLoaded', function () {
 
   setupVoiceInput();
 
+  // Sector selection handling: persist selection and expose value to sendMessage
+  var sectorSelect = document.getElementById('sectorSelect');
+  var SECTOR_KEY = 'chatbotSector';
+  try {
+    var savedSector = localStorage.getItem(SECTOR_KEY);
+    if (sectorSelect) {
+      sectorSelect.value = savedSector || 'general';
+      sectorSelect.addEventListener('change', function (e) {
+        try { localStorage.setItem(SECTOR_KEY, sectorSelect.value); } catch (err) { /* ignore */ }
+        // Small optional system note to indicate mode change to the user
+        var label = sectorSelect.options[sectorSelect.selectedIndex] ? sectorSelect.options[sectorSelect.selectedIndex].text : sectorSelect.value;
+        showSectorSwitchNotice('Switched to ' + label + ' mode');
+      });
+    }
+  } catch (e) { /* ignore localStorage errors */ }
+
   // Suggestion cards click handler (fills input but does not auto-send)
   var suggestionGrid = document.querySelector('.suggestion-grid');
   if (suggestionGrid) {
@@ -474,6 +535,28 @@ document.addEventListener('DOMContentLoaded', function () {
     } catch (e) { /* ignore append errors */ }
   }
 
+  function showSectorSwitchNotice(text) {
+    try {
+      var existingNotices = chatMessages.querySelectorAll('.sector-switch-notice');
+      var noticeRow = existingNotices[0];
+      for (var i = 1; i < existingNotices.length; i++) {
+        existingNotices[i].remove();
+      }
+
+      if (!noticeRow) {
+        noticeRow = document.createElement('div');
+        noticeRow.className = 'system-note-row sector-switch-notice';
+        var notice = document.createElement('div');
+        notice.className = 'system-note';
+        noticeRow.appendChild(notice);
+        chatMessages.appendChild(noticeRow);
+      }
+
+      noticeRow.querySelector('.system-note').textContent = text;
+      scrollChatToBottom();
+    } catch (e) { /* ignore append errors */ }
+  }
+
   async function sendMessage() {
     if (isSending) {
       return;
@@ -501,12 +584,17 @@ document.addEventListener('DOMContentLoaded', function () {
     setSendButtonStop();
 
     try {
+      // include the currently selected sector (frontend only sends a short key)
+      var sectorVal = 'general';
+      if (typeof sectorSelect !== 'undefined' && sectorSelect && sectorSelect.value) {
+        sectorVal = sectorSelect.value;
+      }
       var response = await fetch('/api/chat', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
         },
-        body: JSON.stringify({ message: message }),
+        body: JSON.stringify({ message: message, sector: sectorVal }),
         signal: controller.signal,
       });
 

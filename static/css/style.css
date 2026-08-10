@@ -246,8 +246,9 @@ input {
   flex-direction: column;
   gap: 14px;
   flex: 1;
+  min-height: 0;
   padding: 28px 24px;
-  margin-bottom: 18px;
+  margin-bottom: 0;
   background: var(--chat-bg), var(--chat-pattern);
   background-size: 24px 24px, auto;
   border: 1px solid var(--chat-border);
@@ -329,9 +330,7 @@ input {
 
 /* hide hero when messages exist */
 .chat-messages:has(.message-row) .chat-hero {
-  opacity: 0;
-  transform: translateY(-10px);
-  pointer-events: none;
+  display: none;
 }
 
 .hero-title {
@@ -559,6 +558,42 @@ input {
   margin: 0 0 1em;
 }
 
+.ai-message h2,
+.ai-message h3,
+.ai-message h4 {
+  margin: 1.2em 0 0.5em;
+  font-weight: 750;
+  line-height: 1.3;
+  color: inherit;
+}
+
+.ai-message h2 { font-size: 1.28em; }
+.ai-message h3 { font-size: 1.16em; }
+.ai-message h4 { font-size: 1.06em; }
+
+.ai-message h2:first-child,
+.ai-message h3:first-child,
+.ai-message h4:first-child {
+  margin-top: 0;
+}
+
+.typing-cursor {
+  display: inline-block;
+  width: 2px;
+  height: 1.1em;
+  margin-left: 3px;
+  vertical-align: -0.15em;
+  background: currentColor;
+  animation: typingCursorBlink 0.8s steps(1, end) infinite;
+}
+
+@keyframes typingCursorBlink {
+  0%,
+  49% { opacity: 1; }
+  50%,
+  100% { opacity: 0; }
+}
+
 @keyframes fadeInUp {
   to {
     opacity: 1;
@@ -581,13 +616,19 @@ input {
 
 /* Input area participates in normal document flow — placed after hero content; will be pushed to bottom when conversation is active via margin-top:auto */
 .chat-messages .input-area {
-  position: static;
+  position: sticky;
+  bottom: 0;
   width: 100%;
   display: flex;
+  flex-direction: column;
+  align-items: center;
   justify-content: center;
+  flex: 0 0 auto;
+  order: 1;
   padding: 12px 0 0;
   pointer-events: auto;
   z-index: 4;
+  background: var(--chat-bg);
   margin-top: 12px;
 }
 
@@ -595,6 +636,12 @@ input {
 .chat-messages:has(.message-row) .input-area {
   margin-top: auto; /* push input to bottom of the chat card */
   padding-bottom: 18px;
+}
+
+.chat-messages .message-row,
+.chat-messages .system-note-row,
+.chat-messages .chat-hero {
+  flex: 0 0 auto;
 }
 
 /* Unified pill container for input + buttons */
@@ -688,6 +735,63 @@ input {
   .hero-title { font-size: 1.4rem; }
 }
 
+/* Sector select styling placed near input */
+.sector-select-wrap {
+  width: 100%;
+  display: flex;
+  justify-content: center;
+  align-items: center; /* vertically center label and select */
+  gap: 10px; /* small space between label and dropdown */
+  padding-bottom: 8px;
+}
+
+/* Visible, prominent label for the sector dropdown — targeted to avoid changing global sr-only behavior */
+.sector-select-wrap label[for="sectorSelect"] {
+  font-weight: 600; /* slightly bold to read as a label */
+  position: static;
+  width: auto;
+  height: auto;
+  padding: 0;
+  overflow: visible;
+  clip: auto;
+  white-space: normal;
+  display: inline-block;
+  line-height: 1; /* align with the dropdown height */
+  margin: 0; /* do not add extra spacing */
+}
+
+.sector-select {
+  appearance: none;
+  -webkit-appearance: none;
+  border: 1px solid var(--border-color);
+  background: var(--input-bg, rgba(255,255,255,0.02));
+  color: var(--text-color);
+  padding: 8px 12px;
+  border-radius: 12px;
+  font-size: 0.95rem;
+  min-width: 200px;
+  max-width: 420px;
+  box-shadow: 0 6px 18px rgba(2,6,23,0.04);
+}
+
+.sector-select:focus {
+  outline: none;
+  box-shadow: 0 8px 24px rgba(37,99,235,0.08);
+  border-color: var(--accent);
+}
+
+/* Add a simple arrow indicator using a background SVG (keeps markup unchanged) */
+.sector-select {
+  background-image: linear-gradient(45deg, transparent 50%, rgba(0,0,0,0.04) 50%), linear-gradient(135deg, rgba(0,0,0,0.04) 50%, transparent 50%), radial-gradient(#fff 0, #fff 100%);
+  background-position: calc(100% - 18px) calc(1em + 2px), calc(100% - 13px) calc(1em + 2px), 100% 0;
+  background-size: 6px 6px, 6px 6px, 2.5em 2.5em;
+  background-repeat: no-repeat;
+}
+
+@media (max-width: 600px) {
+  .sector-select { min-width: 140px; max-width: 100%; }
+}
+
 /* Layout: sidebar + chat */
 .app-layout {
   display: flex;
@@ -733,7 +837,9 @@ input {
 .chat-column {
   display: flex;
   flex-direction: column;
-  min-height: 100vh;
+  height: calc(100dvh - 48px);
+  min-height: 0;
+  overflow: hidden;
   padding: 24px;
   /* In the combined layout the chat should grow to fill available space */
   flex: 1 1 720px;
@@ -1048,6 +1154,10 @@ input {
 }
 
 @media (max-width: 600px) {
+  .chat-column {
+    height: calc(100dvh - 64px);
+  }
+
   .chat-app {
     padding: 16px;
   }

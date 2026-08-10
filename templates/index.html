@@ -87,6 +87,16 @@
           <!-- Input area is placed inside the chat messages area so it can appear as part of the hero when empty
                and dock to the bottom when conversations exist. IDs are preserved for existing JS. -->
           <div class="input-area">
+            <div class="sector-select-wrap">
+              <label for="sectorSelect" class="sr-only">Select sector</label>
+              <select id="sectorSelect" class="sector-select" aria-label="Select sector">
+                <option value="general" selected>General</option>
+                <option value="healthcare">Healthcare &amp; Medical</option>
+                <option value="business">Business &amp; Finance</option>
+                <option value="education">Education &amp; Learning</option>
+                <option value="legal">Legal &amp; Compliance</option>
+              </select>
+            </div>
             <div class="input-pill">
               <input id="messageInput" class="message-input" type="text" placeholder="Ask me anything" aria-label="Ask me anything" />
               <button id="micButton" class="mic-button" type="button" aria-label="Start voice input">🎤</button>

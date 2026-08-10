@@ -269,3 +269,18 @@ document.addEventListener('DOMContentLoaded', function () {
     }
   });
 });
+
+// Page loader handling: fade out after progress finishes
+window.addEventListener('load', function () {
+  // Slightly longer than the CSS animation to ensure full fill
+  var hideDelay = 2600; // ms
+  setTimeout(function () {
+    var loader = document.getElementById('pageLoader');
+    if (!loader) return;
+    loader.classList.add('loader-hidden');
+    // Remove after fade transition completes (~420ms)
+    setTimeout(function () {
+      if (loader && loader.parentNode) loader.parentNode.removeChild(loader);
+    }, 420);
+  }, hideDelay);
+});

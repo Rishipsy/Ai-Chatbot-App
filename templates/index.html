@@ -7,6 +7,16 @@
   <link rel="stylesheet" href="/static/css/style.css" />
 </head>
 <body>
+  <div id="pageLoader" class="page-loader" role="status" aria-live="polite">
+    <div class="loader-content">
+      <div id="loaderLogo" class="loader-logo">🤖 <span>AI Chatbot</span></div>
+      <div id="loaderProgress" class="loader-progress" aria-hidden="true">
+        <div id="loaderProgressFill" class="loader-progress-fill"></div>
+      </div>
+      <div class="loader-tagline">Loading your assistant...</div>
+    </div>
+  </div>
+
   <main class="chat-app">
     <header class="app-header">
       <h1>AI Chatbot</h1>
